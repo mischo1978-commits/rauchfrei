@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1c1b22">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Rauchfrei">
+<title>Mein Rauchfrei-Tracker · Rauchzeiten</title>
+<style>
+:root{color-scheme:dark;--bg:#1c1b22;--card:#2b2a33;--accent:#ff8065;--muted:#b7b3bd;--line:#494750}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}main{max-width:500px;margin:0 auto;padding:calc(24px + env(safe-area-inset-top)) 16px calc(24px + env(safe-area-inset-bottom))}h1{color:var(--accent);text-align:center;font-size:27px;margin:10px 0}.subtitle{text-align:center;color:var(--muted);margin:0 0 26px}.card{background:var(--card);border:1px solid #755149;border-radius:22px;padding:20px;margin-bottom:12px;text-align:center}.label{color:var(--muted);font-size:14px;margin-bottom:12px}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}.time{background:#36343e;border-radius:13px;padding:13px 2px}.time strong{display:block;font-size:clamp(22px,6vw,29px);font-variant-numeric:tabular-nums;color:var(--accent)}.time small{font-size:11px;color:var(--muted)}.two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.two .card{padding:19px 8px}.big{font-size:clamp(26px,7vw,38px);font-weight:800;letter-spacing:-.5px;font-variant-numeric:tabular-nums}.orange{color:var(--accent)}.metric-label{color:var(--muted);font-size:13px;margin-top:8px}.rate{font-size:32px;font-weight:800}.note{color:var(--muted);font-size:12px;margin-top:9px}.goals-title{color:var(--accent);font-size:21px;font-weight:750;margin:2px 0 16px}.goal{text-align:left;margin:19px 0 0;font-size:14px}.goal:first-child{margin-top:0}.goal-row{display:flex;justify-content:space-between;gap:10px}.goal .percent{color:var(--accent);font-variant-numeric:tabular-nums}.progress{height:9px;background:var(--line);border-radius:9px;overflow:hidden;margin-top:9px}.bar{height:100%;background:var(--accent);border-radius:9px}.done .bar{background:#77d7a5}.done .percent{color:#77d7a5} .swipe-card{touch-action:pan-y;user-select:none;cursor:pointer;min-height:154px;display:flex;flex-direction:column;align-items:center;justify-content:center}.swipe-card:focus-visible{outline:2px solid var(--accent);outline-offset:3px}.swipe-card .big{line-height:1.2}.swipe-hint{color:#9d97a5;font-size:11px;margin-top:10px}.dots{display:flex;justify-content:center;gap:6px;margin-top:12px}.dot{width:6px;height:6px;border-radius:50%;background:#635b65}.dot.active{background:var(--accent);width:15px;border-radius:5px}.full-swipe{min-height:160px}.full-swipe .big{font-size:clamp(34px,10vw,51px)}footer{text-align:center;color:#96919d;font-size:12px;margin:25px 0}
+</style>
+</head>
+<body><main>
+<h1>🔥 Mein Rauchfrei-Tracker</h1>
+<p class="subtitle">Rauchfrei seit 18.04.2026 · 13:30 Uhr</p>
+<section class="card"><div class="label">Meine rauchfreie Zeit</div><div class="grid">
+<div class="time"><strong id="days">0</strong><small>Tage</small></div><div class="time"><strong id="hours">0</strong><small>Stunden</small></div><div class="time"><strong id="minutes">0</strong><small>Minuten</small></div><div class="time"><strong id="seconds">0</strong><small>Sekunden</small></div>
+</div></section>
+<div class="two">
+<section class="card swipe-card" id="metric1" tabindex="0" role="button" aria-label="Nach links oder rechts wischen für weitere Statistiken"><div class="big orange" id="metric1-value">0</div><div class="metric-label" id="metric1-label">🚭 Nicht gerauchte Zigaretten</div><div class="dots" id="metric1-dots"></div></section>
+<section class="card swipe-card" id="metric2" tabindex="0" role="button" aria-label="Nach links oder rechts wischen für weitere Statistiken"><div class="big orange" id="metric2-value">0</div><div class="metric-label" id="metric2-label">⏱️ Geschätzte Zeit gespart (Tage)</div><div class="dots" id="metric2-dots"></div></section>
+</div>
+<section class="card swipe-card full-swipe" id="metric3" tabindex="0" role="button" aria-label="Nach links oder rechts wischen für verschiedene Ersparnisse"><div class="big orange" id="metric3-value">0,00 €</div><div class="metric-label" id="metric3-label">💰 Gesamte Ersparnis bisher</div><div class="dots" id="metric3-dots"></div><div class="swipe-hint">↔ Wischen oder antippen für weitere Werte</div></section>
+<section class="card"><div class="label">Deine Grundlage</div><div class="rate" id="daily">7,14 € pro Tag</div><div class="note">15 Zigaretten täglich · 21 Stück pro Schachtel · 10,00 € je Schachtel<br>Frühere Rauchzeiten: 06:00–23:00 Uhr · nachts bleibt der Zähler stehen</div></section>
+<section class="card"><div class="goals-title">🏆 Meine Meilensteine</div><div id="goals"></div></section>
+<footer>*20 Minuten je vermiedener Zigarette als statistischer Modellwert, keine individuelle Vorhersage.<p>Jede rauchfreie Sekunde zählt ❤️</p></footer>
+</main><script>
+'use strict';
+// Rauchstopp: 18. April 2026, 13:30 Uhr deutscher Sommerzeit (MESZ).
+const START_MS = Date.parse('2026-04-18T13:30:00+02:00');
+const CIGARETTES_PER_DAY = 15;
+const CIGARETTES_PER_PACK = 21;
+const PACK_PRICE_EUR = 10;
+const PRICE_PER_CIGARETTE = PACK_PRICE_EUR / CIGARETTES_PER_PACK;
+const DAY_SECONDS = 86400;
+const SMOKING_START_HOUR = 6;
+const SMOKING_END_HOUR = 23;
+const SMOKING_HOURS = SMOKING_END_HOUR - SMOKING_START_HOUR;
+const START_DAY_UTC = Date.UTC(2026, 3, 18) / 86400000;
+const START_SMOKING_FRACTION = (13.5 - SMOKING_START_HOUR) / SMOKING_HOURS;
+const berlinClock = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit',
+  hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+});
+function avoidedCigarettes(now) {
+  if (now.getTime() <= START_MS) return 0;
+  const parts = Object.fromEntries(berlinClock.formatToParts(now).filter(p => p.type !== 'literal').map(p => [p.type, Number(p.value)]));
+  const currentDayUTC = Date.UTC(parts.year, parts.month - 1, parts.day) / 86400000;
+  const daysBetween = currentDayUTC - START_DAY_UTC;
+  const hourOfDay = parts.hour + parts.minute / 60 + parts.second / 3600;
+  const smokingFraction = Math.max(0, Math.min(1, (hourOfDay - SMOKING_START_HOUR) / SMOKING_HOURS));
+  return Math.max(0, CIGARETTES_PER_DAY * (daysBetween + smokingFraction - START_SMOKING_FRACTION));
+}
+const goals = [
+  ['1 Tag rauchfrei', 1, 'days'],
+  ['1 Woche rauchfrei', 7, 'days'],
+  ['1 Monat rauchfrei', 30, 'days'],
+  ['100 Tage rauchfrei', 100, 'days'],
+  ['200 Tage rauchfrei', 200, 'days'],
+  ['3.000 Zigaretten vermieden', 3000, 'cigs'],
+  ['1.500 € gespart', 1500, 'money'],
+  ['1 Jahr rauchfrei', 365, 'days']
+];
+// Die Zeitwerte sind reine Modellschätzungen, keine persönliche Gesundheitsprognose.
+const MINUTES_PER_CIG = 4;
+const LIFE_MINUTES_PER_CIG = 20;
+const carousel = {metric1:0, metric2:0, metric3:0};
+const carouselSizes = {metric1:2, metric2:2, metric3:4};
+const number = (n, decimals=0) => n.toLocaleString('de-DE', {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+const el = id => document.getElementById(id);
+const euro = n => number(n,2)+' €';
+el('daily').textContent = euro(CIGARETTES_PER_DAY * PRICE_PER_CIGARETTE) + ' pro Tag';
+function renderCard(id, entries){
+  const i = carousel[id];
+  el(id+'-value').textContent = entries[i][0];
+  el(id+'-label').textContent = entries[i][1];
+  el(id+'-dots').innerHTML = entries.map((_,j)=>'<span class="dot'+(i===j?' active':'')+'"></span>').join('');
+}
+function update() {
+  const seconds = Math.max(0, Math.floor((Date.now()-START_MS)/1000));
+  const days = Math.floor(seconds / DAY_SECONDS);
+  const cigs = avoidedCigarettes(new Date());
+  const money = cigs * PRICE_PER_CIGARETTE;
+  const wholeCigs = Math.floor(cigs);
+  el('days').textContent = number(days);
+  el('hours').textContent = number(Math.floor(seconds % DAY_SECONDS / 3600));
+  el('minutes').textContent = number(Math.floor(seconds % 3600 / 60));
+  el('seconds').textContent = number(seconds % 60);
+  renderCard('metric1', [
+    [number(wholeCigs),'🚭 Nicht gerauchte Zigaretten'],
+    [number(Math.floor(cigs/CIGARETTES_PER_PACK)),'📦 Nicht gekaufte Schachteln']
+  ]);
+  renderCard('metric2', [
+    [number(Math.floor(cigs*MINUTES_PER_CIG/1440)),'⏱️ Geschätzte Zeit gespart (Tage)'],
+    [number(Math.floor(cigs*LIFE_MINUTES_PER_CIG/1440)),'❤️ Statistisch gewonnene Lebenstage*']
+  ]);
+  renderCard('metric3', [
+    [euro(money),'💰 Gesamte Ersparnis bisher'],
+    [euro(CIGARETTES_PER_DAY*PRICE_PER_CIGARETTE*7),'💰 Wöchentliche Ersparnis'],
+    [euro(CIGARETTES_PER_DAY*PRICE_PER_CIGARETTE*30),'💰 Ersparnis in 30 Tagen'],
+    [euro(CIGARETTES_PER_DAY*PRICE_PER_CIGARETTE*365),'💰 Ersparnis in 365 Tagen']
+  ]);
+  el('goals').innerHTML = goals.map(([label,target,type]) => {
+    const value = type==='days' ? seconds/DAY_SECONDS : type==='cigs' ? cigs : money;
+    const percent = Math.min(100, value / target * 100);
+    const complete = value >= target;
+    return `<div class="goal${complete?' done':''}"><div class="goal-row"><span>${complete?'✓ ':''}${label}</span><span class="percent">${Math.floor(percent)} %</span></div><div class="progress"><div class="bar" style="width:${percent}%"></div></div></div>`;
+  }).join('');
+}
+for (const id of Object.keys(carouselSizes)) {
+  const node=el(id);
+  let startX=0, startY=0;
+  const change=delta=>{carousel[id]=(carousel[id]+delta+carouselSizes[id])%carouselSizes[id];update();};
+  node.addEventListener('touchstart',e=>{startX=e.changedTouches[0].clientX;startY=e.changedTouches[0].clientY;},{passive:true});
+  node.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-startX;
+    const dy=e.changedTouches[0].clientY-startY;
+    if(Math.abs(dx)>35 && Math.abs(dx)>Math.abs(dy)*1.2){change(dx<0?1:-1);node.dataset.swiped='1';}
+  },{passive:true});
+  node.addEventListener('click',()=>{if(node.dataset.swiped==='1'){node.dataset.swiped='';return;}change(1);});
+  node.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'||e.key==='Enter'||e.key===' '){e.preventDefault();change(e.key==='ArrowLeft'?-1:1);}});
+}
+update();
+setInterval(update, 1000);
+</script></body></html>
